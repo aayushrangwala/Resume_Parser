@@ -17,6 +17,10 @@ import datetime
 import logging
 
 
+
+
+
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 # create a file handler
@@ -32,15 +36,6 @@ logger.addHandler(handler)
 
 logger.info('\n\n################################ Starting Logs ########################################\n')
 logger.info('Logging Strats, Date: ' + str(datetime.datetime.utcnow()) + '\n\n')
-
-
-######## Using Properties file #####################
-
-#p = Properties()
-#with open("Parser_Config.properties","rb") as fp:
-#    p.load(fp,"utf-8")
-############################################
-
 
 logger.info('Reading Resume_parser.ini file for credentials of db and mail...')
 config = configparser.ConfigParser()
@@ -85,10 +80,30 @@ logger.info('Established Connection, DB Instance: ' + str(db_inst))
 ########################################
 
 
+"""
+def to_Process(resumes_list):
+    ## Check the resume.txt with resp threshold value/passing value, true for send test and false for rejection ##
+
+    logger.info('\nTraversing the list of attachments for getting the passing marks...\n')
+       
+    processor = resume_processor(<path of applications maybe>)
+
+    for att in att_list:
+        is_Rejected, profile, exp = resume_processor.process_resume(post[str(att)])
+
+        if not is_Rejected:
+           ans = raw_input("\nResume shortlisted: \n" + str(att) + " Do you really want to send test? (y/n)")
+           if ans == 'y':
+               reply_mail_obj.send_reply(mail,profile,exp)
+        else:
+           reply_mail_obj.send_reply(mail)
+
+"""
+
 
 ## Asking for the task to perform ##
 
-option = input('\nDo you want to parse new mails or reply to existing: 1. parse, 2. Reply\n')
+option = input('\nDo you want to parse new mails or reply to existing: 1. Parse Mails, 2. Reply, 3. Process the Unprocessed Resumes: \n')
 
 
 
@@ -104,9 +119,16 @@ if option == 1:
     f_mail = int(mail_list[0]) - 1
     l_mail = int(mail_list[-1]) 
 
+
+    ## List containing the attachment names of this parse run in all mails
+
+    att_list = []
+    
     for mail in range(l_mail,f_mail,-1):
         logger.info('Parsing the Mail list, one by one...')
-        att_list, post = mail_obj.parse_mail(mail,inst)
+        post = mail_obj.parse_mail(mail,inst)
+        att_list.append(post[str(att_name)])
+
         logger.info('The post which is to be updated in DB after parsing the mail is: \n' + str(post))
         logger.info('Initiating Update...')
         db_inst.update_db(post)
@@ -117,26 +139,19 @@ if option == 1:
 
 """
 
-## Check the resume.txt with resp threshold value/passing value, true for send test and false for rejection ##
-
     op = raw_input("\nGot the list of resumes in this run, Do you want to process and perform rejection or accept actions: (y/n)\n")
     
     if op == 'y':
-        logger.info('\nTraversing the list of attachments for getting the passing marks...\n')
-        
-        processor = resume_processor(<path of applications maybe>)
-
-        for att in att_list:
-            is_Rejected, profile, exp = resume_processor.process_resume(post[str(att)])
-            if not is_Rejected:
-               reply_mail_obj.send_reply(mail,profile,exp)
-            else:
-               reply_mail_obj.send_reply(mail)
+        to_Process(att_list)
+    else:
+        logger.info('\nResumes are left unprocessed, saved in DB with status URR and the list is : \n ' + att_list)
+        print("\nThe Resumes are un processed, saved in DB with status 'URR'\n")
 
 """
 
 
 elif option == 2: 
+
     reply_mail_obj = Reply_Module(inst, db_inst)
 
     mail_id = raw_input("\nEnter Mail_id to be replied: \n")
@@ -153,6 +168,19 @@ elif option == 2:
             reply_mail_obj.send_Custom_Reply(mail_id, send_test,text)
         else:
             reply_mail_obj.send_Custom_Reply(mail_id,send_test)
+"""
+
+elif option == 3: 
+    
+    if raw_input("\nWant to process all or till date (1/2): \n") == '1':
+        up_list = db_inst.get_Unprocessed_Resumes()
+    else:
+        date = raw_input("\nThen enter date: \n")
+        up_list = db_inst.get_Unprocessed_Resumes(date)
+    
+    to_Process(up_list)
+
+"""
 
 else:
     logger.error('\nInvalid Option selected...\n') 

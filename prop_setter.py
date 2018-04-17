@@ -22,15 +22,19 @@ test_link_temp = "Hi,\n\nThank you for applying to Coriolis.  We found your prof
 
 rej_temp = "Hi, \n\n We regret to say that your profile is not selected at this point. \n\n We will still be keeping your resume and let you know when suitable pofile opening comes up.\n\n\n\n\nThanks and Regards\n\nTrupti Dongare\nHR-Coriolis Technologies Pvt Ltd"
 
+
+interview_temp = "Hi, \n\nWe would like to schedule a face-to-face interview with you at our office on XXXXXX . \nThe interview process may take between 2-3 hours depending on the number of rounds. \n\nLet me know if this time suits you. Feel free to reach out for any other clarifications. \n\nAddress :-\n\nCoriolis Technologies Pvt. Ltd \n'Sai Pratik- Building ', Ganesh Baug, Aundh, Pune, Maharashtra 411007\nPhone: 020 2729 0187\n\n\n\nThanks and Regards \nTrupti Dongare\nHR-Coriolis Technologies Pvt Ltd"
+
+
 config['MESSAGE_TEMPLATE'] = {
-                               'TL_msg': str(test_link_temp), 'R_msg': str(rej_temp)
+                               'TL_msg': str(test_link_temp), 'R_msg': str(rej_temp), 'I_msg': str(interview_temp)
                              }
 
 
 config['STATUS_CODE'] = {
-                          "UNDER_REVIEW_RESUME" : "URR", "UNDER_REVIEW_TEST": "URT", "UNDER_REVIEW_INTERVIEW": "URF", 
-                          "REJECTION_BEFORE_TEST": "REJBT", "REJECION_AFTER_TEST": "REJAT", "REJECION_AFTER_INTERVIEW": "REJAF", 
-                          "SELECTED_TEST": "SELT", "SELECTED_RESUME": "SELR", "SELECTED": "SEL" 
+                          "URR":"UNDER_REVIEW_RESUME", "URT":"UNDER_REVIEW_TEST", "URF": "UNDER_REVIEW_INTERVIEW", 
+                          "REJBT": "REJECTION_BEFORE_TEST", "REJAT": "REJECION_AFTER_TEST", "REJAF": "REJECION_AFTER_INTERVIEW", 
+                          "SELT": "SELECTED_TEST", "SELR": "SELECTED_RESUME", "SEL": "SELECTED" 
 		        }
 
 

@@ -13,12 +13,14 @@ import json
 import logging
 
 
+
+
+
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-## List containing the attachment names of this parse run in all mails
 
-att_list = [] 
 
 class mail_class(object):
     #---Initialization------
@@ -27,7 +29,7 @@ class mail_class(object):
     	self.FROM_PASS = str(FROM_PASS)
     	self.MAIL_SERVER = MAIL_SERVER
     	self.SERVER_PORT = SERVER_PORT
-    	self.curr_dir = CURR_DIR 
+    	self.curr_dir = CURR_DIR
 
 
     def connect_select(self, section):
@@ -54,7 +56,6 @@ class mail_class(object):
 
 
 
-# m -> individual mail
     
     def parse_mail(self, mail, mail_inst):
 	type,data = mail_inst.fetch(mail,'(RFC822)')
@@ -92,16 +93,15 @@ class mail_class(object):
                 logger.info('Attachments found...extracting Text...')
 
                 logger.info('\nAppending the list of attachments as: \n' + att_name)
-                att_list.append(att_name)
 
                 logger.info('Initiating Extraction of text....')            
 	        self.extract(curr_dir,att_name)	
 
                 logger.info('Updating DB...........')
 
-                post = {"Date": datetime.datetime.utcnow(), "Mail_ID": str(mail_from),"Subject": str(subject), "Message": str(final_message), "Resume_File_Name": str(att_name) + ".txt", "Status": "xxx", "Status_Desc": "", "Test_Link": "NA"}
+                post = {"Date": datetime.datetime.utcnow(), "Mail_ID": str(mail_from),"Subject": str(subject), "Message": str(final_message), "Resume_File_Name": str(att_name) + ".txt", "Status": "URR", "Status_Desc": "UNDER_REVIEW_RESUME", "Test_Link": "NA"}
 
-	return (att_list, post)
+	return (post)
 
 
 

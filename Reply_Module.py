@@ -106,6 +106,7 @@ class Reply_Module(object):
     def get_Slab_and_Profile_Util(self, profile, exp):
         slab = ""
         profile_TL = ""
+
         if exp > 0 and exp <= 1:
             slab = "SLAB_1"
         elif exp > 1 and exp <= 2:
@@ -120,6 +121,7 @@ class Reply_Module(object):
         profile_TL = self.PRO_DIC[profile] 
 
         return (str(profile_TL), slab)
+
 
 
     def get_Test_Mail_Template(self):
@@ -192,19 +194,20 @@ class Reply_Module(object):
 
     def send_reply(self, MAIL, profile=None, exp=None):
         reply_msg = self.set_Reply_Properties(MAIL,None)
-        
-        if profile is not None and exp is not None:
+
+        if (profile is not None) and (exp is not None):
             test_link = self.get_Test_Link(profile,exp)
             test_link_msg_template = self.get_Test_Mail_Template()
             test_link_msg = string.replace(test_link_msg_template, 'XXXXXX', test_link)
             reply_msg = self.attach_mail_body(test_link_msg, reply_msg)
+            self.DB_INSTANCE.update_status(reply_msg['to'],True,test_link)
         else:
             rej_msg = get_Rejection_Template()
             reply_msg = self.attach_mail_body(rej_msg, reply_msg)
+            self.DB_INSTANCE.update_status(reply_msg['to'],false,None,False,True)  
 
         self.send_now(reply_msg)
-        
-        **** update_db "Status" , "Status_Desc" and "Test_Link" fields ****      
+           
 
 '''
 
