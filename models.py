@@ -12,7 +12,7 @@ import configparser
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-##### IN reply_config.ini reverse the dic of codes from "desc to code" to "code to desc"
+
 config = configparser.ConfigParser()
 config.read("Reply_Config.ini")
 

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#From Aarkham Knight with Love
+
 
 from urllib import quote_plus
 import imaplib, smtplib, email

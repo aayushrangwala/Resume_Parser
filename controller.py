@@ -1,8 +1,4 @@
 #!/usr/bin/python
-#From Aarkham Knight with Love
-#https://github.com/kevthehermit/Maildb
-#https://github.com/givp/Flask-MongoDB-Project/blob/master/models.py
-#https://github.com/MongoEngine/mongoengine/blob/master/docs/tutorial.rst
 
 from pymongo import MongoClient
 from models import *

@@ -1,19 +1,7 @@
 #!/usr/bin/python
 
 import configparser
-#from jproperties import Properties
 
-#p = Properties()
-#p["db_server"] = "192.168.12.244"
-#p["mail_userName"] = "ayush.rangwala"
-#p["mail_pass"] = "R@ngwala17"
-#p["db_name"] = "Applications"
-#p["db_userName"] = "hiring"
-#p["db_pass"] = "Coriolis#!123"
-#p["mail_orgDomain"] = "@coriolis.co.in"
-
-#with open("Parser_Config.properties","wb") as prop_file:
-#    p.store(prop_file,encoding="utf-8")
 
 config = configparser.ConfigParser()
 
