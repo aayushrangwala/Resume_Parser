@@ -65,19 +65,10 @@ class Reply_Module(object):
         self.PRO_DIC = {"JAVA": "JAVA_TEST_LINK", "PYTHON": "PYTHON_TEST_LINK", "LINUX_KERNEL": "LK_TEST_LINK"}
 
 
-    def set_Reply_Properties(self, MAIL=None, mail_id=None):
+    def set_Reply_Properties(self, mail_id):
         logger.info('\nInitiating the starting properties for ML processed resume reply or custom reply: \n')    
-        if MAIL is not None:
-            logger.info('\nSetting the initial properties for the ML processed reply mail: \n')
-            type,data = self.SESSION_INST.fetch(MAIL,'(RFC822)')
-            for response in data:
-                i_msg = email.message_from_string(response[1])
-                REPLY_TO_ADDR = i_msg['reply-to'] or i_msg['from']
-    	        REPLY_SUBJECT = i_msg['subject']
-                r_msg["In-Reply-To"] = i_msg["Message-ID"]
-    	        r_msg["References"] = i_msg["Message-ID"]
-          
-        elif mail_id is not None:
+        
+        try: 
             REPLY_TO_ADDR = mail_id
     	    record = self.DB_INSTANCE.COLLECTION.find_one({"Mail_ID": mail_id})
             REPLY_SUBJECT = record['Subject']
@@ -89,11 +80,16 @@ class Reply_Module(object):
             r_msg['from'] = REPLY_FROM_ADDR
             r_msg['subject'] = 'RE: ' + REPLY_SUBJECT
             logger.info('\nHeaders are set, \nReply To : ' + str(REPLY_TO_ADDR) + ' with subject: ' + str(REPLY_SUBJECT) + ' Message-ID: ' + str(r_msg["Message-ID"]) + '\n')
+        
+        except Exception as e:
+            logger.error("\nException setting the peoperties for mail, maybe mail_id is not given\n")
+            logger.error(e)
+
         return r_msg
 
 
     def get_Test_Link(self, profile, exp):
-        logger.info('Decide Experience Slab, the candidate fits in. ')
+        logger.info('Deciding the Experience Slab, the candidate fits in. ')
         profile_test_link, slab = self.get_Slab_and_Profile_Util(profile,exp)
         logger.info('\nRefering to Rely_Config.ini file for test links \n')
         sectn = R_config[profile_test_link]
@@ -128,6 +124,15 @@ class Reply_Module(object):
         logger.info('\nRefering to Rely_Config.ini file for test mail Template: \n')
         sectn = R_config['MESSAGE_TEMPLATE']
         templ = sectn["TL_msg"]
+        logger.info('Found: ' + str(templ) + '\n')
+        return templ
+
+
+    def get_Interview_Mail_Template(self):
+        logger.info('\nRefering to Rely_Config.ini file for Interview mail Template: \n')
+        sectn = R_config['MESSAGE_TEMPLATE']
+        templ = sectn["I_msg"]
+        logger.info('Found: ' + str(templ) + '\n')
         return templ
 
 
@@ -136,26 +141,45 @@ class Reply_Module(object):
         sectn = R_config['MESSAGE_TEMPLATE']
         templ = sectn["R_msg"]
         logger.info('Found: ' + str(templ) + '\n')
-        return templ             	
+        return templ         
+
+    
+    def get_selection_Mail_Template(self):
+        ogger.info('\nRefering to Rely_Config.ini file for Final Selection mail Template: \n')
+        sectn = R_config['MESSAGE_TEMPLATE']
+        templ = sectn["S_msg"]
+        logger.info('Found: ' + str(templ) + '\n')
+        return templ    
+    	
 
 
 
 
-    def send_Custom_Reply(self,mail_id, send_test, text=None, test_link=""):
+    def send_Custom_Reply(self,MAIL_ID, f2f, date=None, text=None):
         logger.info('\nInitiating Custom Reply: \nFirst setting properties: \n')
-        reply_msg = self.set_Reply_Properties(None,mail_id)
+        reply_msg = self.set_Reply_Properties(MAIL_ID)
 
-        if send_test:
-            logger.info('\nSending Mail with Test message getting template from Reply_Config.ini file \n')
-            test_link_msg_template = self.get_Test_Mail_Template()
-            test_link_msg = test_link_msg_template.replace("XXXXXX", str(test_link))
-            reply_text = test_link_msg
-        elif text is None:
-            logger.info('\nSending Rejection mail, getting template message \n')
-            rej_msg = self.get_Rejection_Template()
-            reply_text = rej_msg
-        else:
-            logger.info('\npreparing custom message \n')
+        #if send_test:
+            #logger.info('\nSending Mail with Test message getting template from Reply_Config.ini file \n')
+            #test_link_msg_template = self.get_Test_Mail_Template()
+            #test_link_msg = test_link_msg_template.replace("XXXXXX", str(test_link))
+            #reply_text = test_link_msg
+        if f2f: ## for f2f need mail_id, true, date
+            logger.info('\nSending Mail with interview message getting template from Reply_Config.ini file \n')
+            interview_msg_template = self.get_Interview_Mail_Template()
+            interview_msg = interview_msg_template.replace("XXXXXX", str(date))
+            reply_text = interview_msg
+            self.DB_INSTANCE.update_status(reply_msg['to'],False,None,True)
+        
+        elif date is not None: ## for selection need only mail_id and date
+            logger.info('\nSending Mail with final selection message getting template from Reply_Config.ini file \n')
+            selection_msg_template = self.get_selection_Mail_Template()
+            selection_msg = selection_msg_template.replace("XXXXXX", str(date))
+            reply_text = selection_msg
+            self.DB_INSTANCE.update_status(reply_msg['to'],False,None,False,False)
+
+        else: ## Text: need only text
+            logger.info('\npreparing custom message... \n')
             reply_text = text
 
         logger.info('\nPreparing and attaching the content to the reply instance \n')
@@ -192,16 +216,18 @@ class Reply_Module(object):
 
 ## Uncomment me when your ML Algo is ready and then comment send_reply() and also the provision of asking the option to parse or reply from user ##
 
-    def send_reply(self, MAIL, profile=None, exp=None):
-        reply_msg = self.set_Reply_Properties(MAIL,None)
+    def send_reply(self, MAIL_ID, profile=None, exp=None):
+        reply_msg = self.set_Reply_Properties(MAIL_ID)
 
         if (profile is not None) and (exp is not None):
+            logger.info("\nSending Mail with Test message getting template from Reply_Config.ini file \n")
             test_link = self.get_Test_Link(profile,exp)
             test_link_msg_template = self.get_Test_Mail_Template()
             test_link_msg = string.replace(test_link_msg_template, 'XXXXXX', test_link)
             reply_msg = self.attach_mail_body(test_link_msg, reply_msg)
             self.DB_INSTANCE.update_status(reply_msg['to'],True,test_link)
         else:
+            logger.info("\nSending Rejection mail, getting template message \n")
             rej_msg = get_Rejection_Template()
             reply_msg = self.attach_mail_body(rej_msg, reply_msg)
             self.DB_INSTANCE.update_status(reply_msg['to'],false,None,False,True)  

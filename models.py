@@ -6,6 +6,7 @@ import datetime
 import time
 import pymongo
 import logging
+import configparser
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -51,20 +52,22 @@ class models(object):
 
 
 
-    def update_status(mail_id, test=False, test_link=None, f2f=False, rej=False):
+    def update_status(mail_id, test=False, test_link=None, f2f=False, rej=False, selected=False):
         post = self.COLLECTION.find({"Mail_ID": mail_id})
 	curr_status = post["Status"]
 	sectn = config["STATUS"]
 		
-	if rej == False
+	if rej == False:
 	    new_status = self.SEL_STATUS_DIC[curr_status]
 	    if (test == True) and (test_link is not None):
-		self.COLLECTION.update_one({"Mail_ID": mail_id},{$set:{"Status":new_status, "Status_Desc": sectn[new_status], "Test_Link": test_link}})
+		self.COLLECTION.update_one({"Mail_ID": mail_id},{"$set": {"Status":new_status, "Status_Desc": sectn[new_status], "Test_Link": test_link}})
 	    elif f2f == True:
-   	        self.COLLECTION.update_one({"Mail_ID": mail_id},{$set:{"Status":new_status, "Status_Desc": sectn[new_status]}})
+   	        self.COLLECTION.update_one({"Mail_ID": mail_id},{"$set": {"Status":new_status, "Status_Desc": sectn[new_status]}})
+            elif selected == True:
+   	        self.COLLECTION.update_one({"Mail_ID": mail_id},{"$set": {"Status":new_status, "Status_Desc": sectn[new_status]}})
 	else:
 	    new_status = self.REJ_STATUS_DIC[curr_status]
-	    self.COLLECTION.update_one({"Mail_ID": mail_id},{$set:{"Status":new_status, "Status_Desc": sectn[new_status]}})
+	    self.COLLECTION.update_one({"Mail_ID": mail_id},{"$set": {"Status":new_status, "Status_Desc": sectn[new_status]}})
 			
 			
 			
@@ -76,16 +79,16 @@ class models(object):
 
     def get_Unprocessed_Resumes(date=None):
         if date is None:
-            up_list = self.COLLECTION.find({'Status': "URR", 'Date': str(date)})
+            up_rec = self.COLLECTION.find({'Status': "URR", 'Date': str(date)})
         else:
-            up_list = self.COLLECTION.find({'Status': "URR"})
-        return up_list
+            up_rec = self.COLLECTION.find({'Status': "URR"})
+        return up_rec
 
 
     def get_Unreplied_to_Test(date=None):
         if date is None:
-            ut_list = self.COLLECTION.find({'Status': "URT", 'Date': str(date)})
+            ut_rec = self.COLLECTION.find({'Status': "URT", 'Date': str(date)})
         else:
-            ut_list = self.COLLECTION.find({'Status': "URT"})
-        return ut_list
+            ut_rec = self.COLLECTION.find({'Status': "URT"})
+        return ut_rec
 

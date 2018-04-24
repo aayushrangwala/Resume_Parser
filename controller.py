@@ -79,24 +79,33 @@ logger.info('Established Connection, DB Instance: ' + str(db_inst))
 
 ########################################
 
+logger.info("\nInitiating reply object: \n")
+reply_mail_obj = Reply_Module(inst, db_inst)
+
+##########################################
+
+
+
 
 """
-def to_Process(resumes_list):
+def to_Process(pending_att_mail_dict):
     ## Check the resume.txt with resp threshold value/passing value, true for send test and false for rejection ##
 
     logger.info('\nTraversing the list of attachments for getting the passing marks...\n')
        
     processor = resume_processor(<path of applications maybe>)
 
-    for att in att_list:
+    for att in pending_att_mail_dict:
         is_Rejected, profile, exp = resume_processor.process_resume(post[str(att)])
 
         if not is_Rejected:
            ans = raw_input("\nResume shortlisted: \n" + str(att) + " Do you really want to send test? (y/n)")
+           mail_id = pending_att_mail_dict[str(att)]
+
            if ans == 'y':
-               reply_mail_obj.send_reply(mail,profile,exp)
+               reply_mail_obj.send_reply(mail_id,profile,exp)
         else:
-           reply_mail_obj.send_reply(mail)
+           reply_mail_obj.send_reply(mail_id)
 
 """
 
@@ -122,65 +131,79 @@ if option == 1:
 
     ## List containing the attachment names of this parse run in all mails
 
-    att_list = []
-    
+    pending_att_mail_dict = {}
+
     for mail in range(l_mail,f_mail,-1):
         logger.info('Parsing the Mail list, one by one...')
         post = mail_obj.parse_mail(mail,inst)
-        att_list.append(post[str(att_name)])
+        pending_att_mail_dict[str(post["Resume_File_Name"])] = post["Mail_ID"]        
 
         logger.info('The post which is to be updated in DB after parsing the mail is: \n' + str(post))
         logger.info('Initiating Update...')
         db_inst.update_db(post)
 
 
-    logger.info('Folder updated, Please find all the applications in the /home/<Username>/Applications/...')
 
-
-"""
-
-    op = raw_input("\nGot the list of resumes in this run, Do you want to process and perform rejection or accept actions: (y/n)\n")
+    #op = raw_input("\nGot the list of resumes in this run, Do you want to process and perform rejection or accept actions: (y/n)\n")
     
-    if op == 'y':
-        to_Process(att_list)
-    else:
-        logger.info('\nResumes are left unprocessed, saved in DB with status URR and the list is : \n ' + att_list)
-        print("\nThe Resumes are un processed, saved in DB with status 'URR'\n")
+    #if op == 'y':
+        #self.to_Process(pending_att_mail_dict)
+    #else:
+        #logger.info('\nResumes are left unprocessed, saved in DB with status URR and the list is : \n ' + att_list)
+        #print("\nThe Resumes are un processed, saved in DB with status 'URR'\n")
 
-"""
+
+
+#logger.info('Folder updated, Please find all the applications in the /home/<Username>/Applications/...')
 
 
 elif option == 2: 
-
-    reply_mail_obj = Reply_Module(inst, db_inst)
 
     mail_id = raw_input("\nEnter Mail_id to be replied: \n")
     op = raw_input("\nDo you want to send the test: (y/n)\n")
     send_test = True if op == 'y' else False
     
     if send_test == True:
-        link = raw_input("\nEnter the Test Link: \n")
-        reply_mail_obj.send_Custom_Reply(mail_id, send_test, None, link)
+        profile = raw_input("\nEnter the Profile: \n")
+        exp = raw_input("\nEnter the Experience in years: \n")
+        logger.info("\ncalling send_reply() from reply_module...\n")
+        reply_mail_obj.send_reply(mail_id,profile,exp)
     else:
-        op = raw_input("\nDo you want to send the Rejection Mail: (y/n)\n")
-        if op == 'n':
-            text = raw_input('\nEnter the Message you want to send: \n')
-            reply_mail_obj.send_Custom_Reply(mail_id, send_test,text)
+        op = raw_input("\nDo you want to send the F2F interview invitation or Rejection Mail or Final Selection: (1/2/3/n)\n")
+        if op == '1':
+            date = raw_input("\nEnter the date and time exactly in format: (dd month'yy hh:mm am/pm) \n")
+            reply_mail_obj.send_Custom_Reply(mail_id, True, date)
+        elif op == '2':
+            reply_mail_obj.send_reply(mail_id)
+        elif op == '3':
+            date = raw_input("\nAre you sure sending the selection mail, if yes, Enter the date and time exactly in format: (dd month'yy hh:mm am/pm) \n")
+            if date is not 'n' :
+            	reply_mail_obj.send_Custom_Reply(mail_id, False, date)
+            else:
+                sys.exit()
         else:
-            reply_mail_obj.send_Custom_Reply(mail_id,send_test)
-"""
+            text = raw_input("\nEnter the custom text and '(\n)' for new line: \n")
+            reply_mail_obj.send_Custom_Reply(mail_id, False,text)
 
-elif option == 3: 
-    
-    if raw_input("\nWant to process all or till date (1/2): \n") == '1':
-        up_list = db_inst.get_Unprocessed_Resumes()
-    else:
-        date = raw_input("\nThen enter date: \n")
-        up_list = db_inst.get_Unprocessed_Resumes(date)
-    
-    to_Process(up_list)
 
-"""
+
+
+#elif option == 3: 
+
+    #pending_att_mail_dict = {}
+    
+    #if raw_input("\nWant to process all or till date (1/2): \n") == '1':
+        #rec = db_inst.get_Unprocessed_Resumes(
+    #else:
+        #date = raw_input("\nThen enter date: \n")
+        #rec = db_inst.get_Unprocessed_Resumes(date)
+    
+    #for r in rec:
+        #pending_att_mail_dict[r['Resume_File_Name']] = r['Mail_ID']
+    
+    #self.to_Process(pending_att_mail_dict)
+
+
 
 else:
     logger.error('\nInvalid Option selected...\n') 

@@ -1,0 +1,23 @@
+
+Do you want to parse new mails or reply to existing: 1. Parse Mails, 2. Reply, 3. Process the Unprocessed Resumes: 
+
+Invalid Option 
+
+
+Do you want to parse new mails or reply to existing: 1. Parse Mails, 2. Reply, 3. Process the Unprocessed Resumes: 
+
+Enter Mail_id to be replied: 
+
+Do you want to send the test: (y/n)
+
+Do you want to send the F2F interview invitation or Rejection Mail or Final Selection: (1/2/3/n)
+
+Do you want to parse new mails or reply to existing: 1. Parse Mails, 2. Reply, 3. Process the Unprocessed Resumes: 
+
+Enter Mail_id to be replied: 
+
+Do you want to send the test: (y/n)
+
+Do you want to send the F2F interview invitation or Rejection Mail or Final Selection: (1/2/3/n)
+
+Are you sure sending the selection mail, if yes, Enter the date and time exactly in format: (dd month'yy hh:mm am/pm) 

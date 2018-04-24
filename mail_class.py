@@ -146,7 +146,7 @@ class mail_class(object):
 
 '''
 
-final constant threshhold = <Some_Integer>
+final constant threshold = <Some_Integer>
     def isRejected(file_name):
         res_threshhold = process_resume(file_name)
 	if threshhold <= res_threshhold:
